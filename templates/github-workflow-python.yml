@@ -1,0 +1,72 @@
+name: Python Linting
+
+on:
+  push:
+    branches: ["**"]
+  pull_request_target:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update && sudo apt install -y gcc libmariadb-dev libmariadb3
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8 isort mypy bandit safety
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # Python Linting (matches current Rules-Decision workflow)
+      - name: Format check with Black
+        run: black --check --diff --line-length=127 .
+
+      - name: Import sorting check with isort
+        run: isort --check-only --diff --line-length=127 .
+
+      - name: Lint with flake8
+        run: |
+          # Stop on syntax errors
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude lib,python3
+          # All other issues as warnings
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude lib,python3
+
+      - name: Type checking with mypy
+        run: mypy --install-types --non-interactive . || true
+
+      - name: Security check with bandit
+        run: bandit -r . -f json -o bandit-report.json || true
+
+      - name: Dependency security check with safety
+        run: safety check --json --output safety-report.json || true
+
+      # Dockerfile Linting
+      - name: Set up Node.js for Dockerfile linting
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install and run dockerfilelint
+        run: |
+          npm install -g dockerfilelint
+          dockerfilelint Dockerfile* || echo "No Dockerfiles found"
+
+      - name: Upload linting reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-linting-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+          if-no-files-found: ignore

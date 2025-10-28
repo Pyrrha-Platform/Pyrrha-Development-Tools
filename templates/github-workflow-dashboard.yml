@@ -1,0 +1,76 @@
+name: Dashboard Linting
+
+on:
+  push:
+    branches: ["**"]
+  pull_request_target:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./pyrrha-dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: './pyrrha-dashboard/yarn.lock'
+
+      - name: Install dependencies
+        run: yarn install
+
+      # JavaScript/React Linting (matches current Dashboard workflow)
+      - name: Lint JavaScript/React with ESLint
+        run: yarn lint
+
+      - name: Format check with Prettier
+        run: yarn format:diff
+
+      - name: Type check (if applicable)
+        run: |
+          if find . -name "*.ts" -o -name "*.tsx" | head -1 | grep -q .; then
+            yarn tsc --noEmit || echo "No TypeScript configuration found"
+          else
+            echo "No TypeScript files found, skipping type check"
+          fi
+
+      - name: Run tests
+        run: yarn test --coverage --watchAll=false
+
+      # Python Flask API Linting
+      - name: Set up Python for Flask API linting
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Lint Flask API with Black
+        run: |
+          cd api-main
+          if [ -f venv/bin/activate ]; then
+            source venv/bin/activate
+            black --check --diff --line-length=127 .
+          else
+            pip install black
+            black --check --diff --line-length=127 .
+          fi
+
+      # Node.js Auth API Linting  
+      - name: Lint Node.js auth API
+        run: |
+          cd api-auth
+          if [ -f package.json ]; then
+            npm install
+            npx prettier --check "**/*.js"
+          fi
+
+      # Dockerfile Linting
+      - name: Dockerfile linting
+        run: |
+          npm install -g dockerfilelint
+          find . -name "Dockerfile*" -exec dockerfilelint {} \;

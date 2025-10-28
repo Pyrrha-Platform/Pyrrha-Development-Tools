@@ -1,0 +1,48 @@
+{
+  "name": "pyrrha-development-tools",
+  "version": "1.0.0",
+  "description": "Centralized development tools and linting for the Pyrrha Platform",
+  "private": true,
+  "scripts": {
+    "lint:all": "node scripts/lint-all.js",
+    "lint:dashboard": "./scripts/lint-dashboard.sh",
+    "lint:python": "./scripts/lint-python.sh", 
+    "lint:nodejs": "./scripts/lint-nodejs.sh",
+    "lint:cpp": "./scripts/lint-cpp.sh",
+    "format:all": "node scripts/lint-all.js --fix",
+    "format:dashboard": "./scripts/lint-dashboard.sh --fix",
+    "format:python": "./scripts/lint-python.sh --fix",
+    "format:nodejs": "./scripts/lint-nodejs.sh --fix",
+    "format:cpp": "./scripts/lint-cpp.sh --fix",
+    "setup": "npm install && pip install -r requirements.txt",
+    "setup:hooks": "./scripts/setup-hooks.sh",
+    "check:workspace": "node scripts/check-workspace.js"
+  },
+  "devDependencies": {
+    "prettier": "^3.1.0",
+    "eslint": "^9.15.0",
+    "@eslint/js": "^9.15.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-testing-library": "^7.13.3",
+    "eslint-plugin-jest-dom": "^5.5.0",
+    "globals": "^16.4.0",
+    "dockerfilelint": "^1.8.0",
+    "chalk": "^4.1.2",
+    "glob": "^10.3.0"
+  },
+  "keywords": [
+    "pyrrha",
+    "linting",
+    "formatting",
+    "development-tools",
+    "code-quality"
+  ],
+  "author": "Pyrrha Platform",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
