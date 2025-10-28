@@ -1,0 +1,61 @@
+name: Centralized Linting
+
+on:
+  # Execute on every push to any branch
+  push:
+    branches:
+      - "**"
+  # Execute on every pull request to the main branch
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Checkout the Development Tools repository alongside current repo
+          path: current-repo
+
+      - name: Checkout Pyrrha Development Tools
+        uses: actions/checkout@v4
+        with:
+          repository: Pyrrha-Platform/Pyrrha-Development-Tools
+          path: dev-tools
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './dev-tools/package-lock.json'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Development Tools
+        run: |
+          cd dev-tools
+          npm install
+          pip install -r requirements.txt
+
+      - name: Run Centralized Linting
+        run: |
+          cd dev-tools
+          export REPO_PATH="$(pwd)/../current-repo"
+          export REPO_NAME="${{ github.event.repository.name }}"
+          node scripts/lint-all.js --repo="${{ github.event.repository.name }}"
+
+      - name: Upload Linting Reports (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linting-reports
+          path: |
+            current-repo/bandit-report.json
+            current-repo/safety-report.json
+          if-no-files-found: ignore
