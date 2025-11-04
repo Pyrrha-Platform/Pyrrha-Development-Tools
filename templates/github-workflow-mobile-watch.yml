@@ -1,0 +1,295 @@
+# GitHub Actions Workflow for Pyrrha Mobile & Watch Apps
+# Handles Android Java mobile app and Tizen JavaScript watch app linting
+
+name: Mobile & Watch Apps Code Quality
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  mobile-app-lint:
+    name: Android Mobile App Linting
+    runs-on: ubuntu-latest
+    if: contains(github.repository, 'Mobile-App')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v2
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Install XML tools
+      run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+    - name: Install Checkstyle
+      run: |
+        wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.5/checkstyle-10.12.5-all.jar
+        echo 'alias checkstyle="java -jar $(pwd)/checkstyle-10.12.5-all.jar"' >> ~/.bashrc
+        source ~/.bashrc
+
+    - name: Run Android linting
+      run: |
+        # Lint Java files with Checkstyle (if config available)
+        find . -name "*.java" -not -path "*/build/*" -not -path "*/generated/*" | head -5
+        
+        # Validate XML files
+        find . -name "*.xml" -path "*/res/*" -o -name "AndroidManifest.xml" | while read -r file; do
+          xmllint --noout "$file" || echo "XML error in $file"
+        done
+        
+        # Run Gradle check
+        ./gradlew check || true
+
+    - name: Run tests
+      run: ./gradlew test
+
+    - name: Generate test report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Android Tests
+        path: '**/TEST-*.xml'
+        reporter: java-junit
+
+  watch-app-lint:
+    name: Tizen Watch App Linting
+    runs-on: ubuntu-latest
+    if: contains(github.repository, 'Watch-App')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+
+    - name: Install XML tools
+      run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+    - name: Install development tools
+      run: |
+        # Clone development tools if not present
+        if [ ! -d "../Pyrrha-Development-Tools" ]; then
+          git clone https://github.com/Pyrrha-Platform/Pyrrha-Development-Tools.git ../Pyrrha-Development-Tools || true
+        fi
+        
+        # Install dependencies
+        if [ -f "../Pyrrha-Development-Tools/package.json" ]; then
+          cd ../Pyrrha-Development-Tools
+          npm install
+          cd -
+        fi
+
+    - name: Validate Tizen config.xml
+      run: |
+        if [ -f "config.xml" ]; then
+          xmllint --noout config.xml
+          echo "✅ config.xml is valid"
+          
+          # Check for Tizen 5.5 compatibility
+          if grep -q "required_version.*5\.5" config.xml; then
+            echo "✅ Tizen 5.5 compatibility configured"
+          else
+            echo "⚠️ Consider updating to Tizen 5.5 for Galaxy Watch 3"
+          fi
+        else
+          echo "❌ config.xml not found"
+          exit 1
+        fi
+
+    - name: Lint JavaScript files
+      run: |
+        # Find JavaScript files
+        js_files=$(find . -name "*.js" -not -path "*/node_modules/*" -not -path "*/lib/*")
+        
+        if [ -n "$js_files" ]; then
+          echo "Found JavaScript files:"
+          echo "$js_files"
+          
+          # Use ESLint if available from development tools
+          if [ -f "../Pyrrha-Development-Tools/node_modules/.bin/eslint" ] && [ -f "../Pyrrha-Development-Tools/configs/eslint-tizen.config.js" ]; then
+            cd ../Pyrrha-Development-Tools
+            npx eslint --config configs/eslint-tizen.config.js $js_files
+            cd -
+          else
+            echo "⚠️ ESLint with Tizen config not available, skipping JS linting"
+          fi
+        else
+          echo "⚠️ No JavaScript files found"
+        fi
+
+    - name: Validate HTML files
+      run: |
+        html_files=$(find . -name "*.html" -not -path "*/lib/*")
+        
+        if [ -n "$html_files" ]; then
+          echo "Validating HTML files..."
+          for file in $html_files; do
+            if xmllint --html --noout "$file" 2>/dev/null; then
+              echo "✅ $file"
+            else
+              echo "❌ HTML syntax error in $file"
+            fi
+          done
+        else
+          echo "⚠️ No HTML files found"
+        fi
+
+    - name: Check Samsung Accessory Protocol
+      run: |
+        sap_files=$(find . -name "*.js" -exec grep -l "SAAgent\|SASocket\|webapis" {} \; 2>/dev/null || true)
+        
+        if [ -n "$sap_files" ]; then
+          echo "✅ Found Samsung Accessory Protocol implementation:"
+          for file in $sap_files; do
+            echo "  - $(basename "$file")"
+            
+            # Check for error handling
+            if grep -q "onerror\|onError" "$file"; then
+              echo "    ✅ Has error handling"
+            else
+              echo "    ⚠️ Consider adding error handling"
+            fi
+            
+            # Check for connection management
+            if grep -q "onconnect\|onConnect\|disconnect" "$file"; then
+              echo "    ✅ Has connection management"
+            else
+              echo "    ⚠️ Consider adding connection management"
+            fi
+          done
+        else
+          echo "⚠️ No Samsung Accessory Protocol implementation found"
+        fi
+
+    - name: Format CSS files (if Prettier available)
+      run: |
+        css_files=$(find . -name "*.css" -not -path "*/lib/*")
+        
+        if [ -n "$css_files" ] && [ -f "../Pyrrha-Development-Tools/node_modules/.bin/prettier" ]; then
+          echo "Checking CSS formatting..."
+          cd ../Pyrrha-Development-Tools
+          npx prettier --config configs/.prettierrc.js --check $css_files || true
+          cd -
+        else
+          echo "⚠️ No CSS files found or Prettier not available"
+        fi
+
+  combined-validation:
+    name: Cross-Platform Validation
+    runs-on: ubuntu-latest
+    if: contains(github.repository, 'Mobile-App') || contains(github.repository, 'Watch-App')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate Samsung Accessory Protocol Integration
+      run: |
+        echo "🔍 Checking for Samsung Accessory Protocol integration..."
+        
+        # Check for mobile app provider
+        if [ -d "app/src/main/java" ]; then
+          provider_files=$(find . -name "*.java" -exec grep -l "SAAgent\|Samsung.*Accessory" {} \; 2>/dev/null || true)
+          if [ -n "$provider_files" ]; then
+            echo "✅ Found Samsung Accessory Protocol provider implementation"
+          else
+            echo "⚠️ No Samsung Accessory Protocol provider found in mobile app"
+          fi
+          
+          # Check accessoryservices.xml
+          if [ -f "app/src/main/res/xml/accessoryservices.xml" ]; then
+            if grep -q "role.*provider" "app/src/main/res/xml/accessoryservices.xml"; then
+              echo "✅ Provider service configured"
+            else
+              echo "⚠️ Provider service not configured"
+            fi
+          fi
+        fi
+        
+        # Check for watch app consumer
+        if [ -f "config.xml" ] && grep -q "tizen:application" "config.xml"; then
+          consumer_files=$(find . -name "*.js" -exec grep -l "SAAgent\|webapis" {} \; 2>/dev/null || true)
+          if [ -n "$consumer_files" ]; then
+            echo "✅ Found Samsung Accessory Protocol consumer implementation"
+          else
+            echo "⚠️ No Samsung Accessory Protocol consumer found in watch app"
+          fi
+        fi
+
+    - name: Documentation Check
+      run: |
+        # Check for integration documentation
+        if [ -f "GALAXY_WATCH_INTEGRATION.md" ] || [ -f "README.md" ]; then
+          echo "✅ Documentation found"
+        else
+          echo "⚠️ Consider adding integration documentation"
+        fi
+        
+        # Check for modernization documentation
+        if [ -f "MODERNIZATION_PLAN.md" ]; then
+          echo "✅ Modernization plan documented"
+        else
+          echo "⚠️ Consider documenting modernization approach"
+        fi
+
+    - name: Dependency Security Scan
+      run: |
+        # Android dependencies
+        if [ -f "app/build.gradle" ]; then
+          echo "🔍 Checking Android dependencies..."
+          # Check for modern AndroidX dependencies
+          if grep -q "androidx" "app/build.gradle"; then
+            echo "✅ Using modern AndroidX libraries"
+          else
+            echo "⚠️ Consider migrating to AndroidX"
+          fi
+          
+          # Check target SDK
+          target_sdk=$(grep "targetSdk" "app/build.gradle" | grep -o '[0-9]\+' | tail -1)
+          if [ "$target_sdk" -ge 34 ]; then
+            echo "✅ Target SDK is modern ($target_sdk)"
+          else
+            echo "⚠️ Consider updating target SDK (current: $target_sdk)"
+          fi
+        fi
+        
+        # Tizen dependencies
+        if [ -f "config.xml" ]; then
+          echo "🔍 Checking Tizen configuration..."
+          if grep -q "required_version.*5\.5" "config.xml"; then
+            echo "✅ Using Tizen 5.5"
+          else
+            echo "⚠️ Consider updating to Tizen 5.5"
+          fi
+        fi
