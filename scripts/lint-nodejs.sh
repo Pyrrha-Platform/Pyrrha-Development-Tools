@@ -20,9 +20,9 @@ echo "🛠️  Tools root: $TOOLS_ROOT"
 cd "$REPO_PATH"
 
 # Copy shared configs if they don't exist or are outdated
-if [[ ! -f .prettierrc.js ]] || [[ "$TOOLS_ROOT/configs/.prettierrc.js" -nt .prettierrc.js ]]; then
+if [[ ! -f .prettierrc.cjs ]] || [[ "$TOOLS_ROOT/configs/.prettierrc.cjs" -nt .prettierrc.cjs ]]; then
     echo "📝 Copying shared Prettier config..."
-    cp "$TOOLS_ROOT/configs/.prettierrc.js" .
+    cp "$TOOLS_ROOT/configs/.prettierrc.cjs" .
 fi
 
 if [[ ! -f eslint.config.js ]] || [[ "$TOOLS_ROOT/configs/eslint.config.js" -nt eslint.config.js ]]; then
@@ -88,7 +88,7 @@ fi
 echo ""
 echo "🔧 === Dockerfile Linting ==="
 if find . -name "Dockerfile*" -type f | head -1 | grep -q .; then
-    find . -name "Dockerfile*" -exec echo "📋 Linting: {}" \\; -exec dockerfilelint {} \\;
+    find . -name "Dockerfile*" -exec echo "📋 Linting: {}" \; -exec dockerfilelint {} \;
 else
     echo "📋 No Dockerfiles found"
 fi

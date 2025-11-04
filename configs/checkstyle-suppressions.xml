@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Suppress checks for generated files -->
+    <suppress checks=".*" files=".*[\\/]build[\\/].*"/>
+    <suppress checks=".*" files=".*[\\/]generated[\\/].*"/>
+    <suppress checks=".*" files=".*[\\/]R\.java"/>
+    <suppress checks=".*" files=".*[\\/]BuildConfig\.java"/>
+    
+    <!-- Suppress checks for Samsung Accessory SDK related files -->
+    <suppress checks="MagicNumber" files=".*[\\/]galaxy[\\/].*"/>
+    <suppress checks="DesignForExtension" files=".*[\\/]galaxy[\\/].*"/>
+    
+    <!-- Suppress checks for BLE service files (complex Android APIs) -->
+    <suppress checks="ParameterNumber" files=".*BluetoothLeService\.java"/>
+    <suppress checks="ExecutableStatementCount" files=".*BluetoothLeService\.java"/>
+    <suppress checks="MethodLength" files=".*DeviceDashboard\.java"/>
+    
+    <!-- Suppress line length for Android manifest and layout files -->
+    <suppress checks="LineLength" files=".*\.xml"/>
+    
+    <!-- Suppress certain checks for activity files (Android lifecycle complexity) -->
+    <suppress checks="FinalParameters" files=".*Activity\.java"/>
+    <suppress checks="HiddenField" files=".*Activity\.java"/>
+    
+    <!-- Suppress TodoComment in development branches -->
+    <suppress checks="TodoComment" files=".*"/>
+</suppressions>

@@ -47,9 +47,9 @@ if [[ -f .prettierrc ]]; then
         echo "🔧 Updating deprecated jsxBracketSameLine to bracketSameLine"
         sed -i.bak 's/jsxBracketSameLine/bracketSameLine/g' .prettierrc
     fi
-elif [[ ! -f .prettierrc.js ]] || [[ "$TOOLS_ROOT/configs/.prettierrc.js" -nt .prettierrc.js ]]; then
+elif [[ ! -f .prettierrc.cjs ]] || [[ "$TOOLS_ROOT/configs/.prettierrc.cjs" -nt .prettierrc.cjs ]]; then
     echo "📝 Copying shared Prettier config..."
-    cp "$TOOLS_ROOT/configs/.prettierrc.js" .
+    cp "$TOOLS_ROOT/configs/.prettierrc.cjs" .
 fi
 
 if [[ ! -f eslint.config.shared.js ]] || [[ "$TOOLS_ROOT/configs/eslint.config.js" -nt eslint.config.shared.js ]]; then
@@ -66,9 +66,9 @@ fi
 # Run Prettier (matches Dashboard package.json format scripts)
 echo "🎨 Running Prettier..."
 if [[ -n "$FIX_MODE" ]]; then
-    yarn format:prettier || yarn prettier --write "**/*.{js,md,scss}" --config .prettierrc.js
+    yarn format:prettier || yarn prettier --write "**/*.{js,md,scss}" --config .prettierrc.cjs
 else
-    yarn format:diff || yarn prettier --check "**/*.{js,md,scss}" --config .prettierrc.js
+    yarn format:diff || yarn prettier --check "**/*.{js,md,scss}" --config .prettierrc.cjs
 fi
 
 # Run ESLint  

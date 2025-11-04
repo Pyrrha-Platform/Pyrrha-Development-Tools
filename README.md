@@ -1,12 +1,14 @@
 # Pyrrha Development Tools
 
-Centralized code quality and linting tools for the entire Pyrrha Platform. This repository provides unified formatting, linting, and code quality enforcement across all Pyrrha repositories.
+Centralized code quality and linting tools for the entire Pyrrha Platform. This repository provides
+unified formatting, linting, and code quality enforcement across all Pyrrha repositories.
 
 ## 🎯 Purpose
 
 - **Unified Standards**: Consistent code style across JavaScript, Python, and other languages
 - **Multi-Repository Support**: Single command to lint all Pyrrha repositories
-- **Technology-Aware**: Automatically detects and applies appropriate tools (React, Flask, Node.js, etc.)
+- **Technology-Aware**: Automatically detects and applies appropriate tools (React, Flask, Node.js,
+  etc.)
 - **CI/CD Ready**: Easy integration with GitHub Actions and other automation
 - **Git Integration**: Pre-commit hooks ensure code quality before commits
 
@@ -22,7 +24,7 @@ npm run setup
 # 3. Check workspace health
 npm run check:workspace
 
-# 4. Lint all repositories  
+# 4. Lint all repositories
 npm run lint:all
 
 # 5. Fix all auto-fixable issues
@@ -76,23 +78,23 @@ npm run check:workspace
 
 ## 🏗️ Repository Support
 
-| Repository | Languages | Tools Applied |
-|------------|-----------|---------------|
-| **Pyrrha-Dashboard** | JavaScript, Python | Prettier, ESLint, Black, isort, flake8, mypy |
-| **Pyrrha-MQTT-Client** | JavaScript | Prettier, ESLint |
-| **Pyrrha-Rules-Decision** | Python | Black, isort, flake8, mypy, bandit, safety |
-| **Pyrrha-WebSocket-Server** | JavaScript | Prettier, ESLint |
-| **Pyrrha-Device-Simulator** | JavaScript | Prettier, ESLint |
-| **Pyrrha-Website** | JavaScript (React) | Prettier, ESLint + React rules |
-| **Pyrrha-Watch-App** | JavaScript | Prettier, ESLint |
-| **Pyrrha-Firmware** | C/C++ (Arduino) | clang-format, static analysis |
+| Repository                  | Languages          | Tools Applied                                |
+| --------------------------- | ------------------ | -------------------------------------------- |
+| **Pyrrha-Dashboard**        | JavaScript, Python | Prettier, ESLint, Black, isort, flake8, mypy |
+| **Pyrrha-MQTT-Client**      | JavaScript         | Prettier, ESLint                             |
+| **Pyrrha-Rules-Decision**   | Python             | Black, isort, flake8, mypy, bandit, safety   |
+| **Pyrrha-WebSocket-Server** | JavaScript         | Prettier, ESLint                             |
+| **Pyrrha-Device-Simulator** | JavaScript         | Prettier, ESLint                             |
+| **Pyrrha-Website**          | JavaScript (React) | Prettier, ESLint + React rules               |
+| **Pyrrha-Watch-App**        | JavaScript         | Prettier, ESLint                             |
+| **Pyrrha-Firmware**         | C/C++ (Arduino)    | clang-format, static analysis                |
 
 ## 🔧 Configuration Files
 
 ### Shared Configurations
 
 - `configs/.prettierrc.js` - Prettier formatting rules (from proven Dashboard config)
-- `configs/eslint.config.js` - ESLint JavaScript/React rules  
+- `configs/eslint.config.js` - ESLint JavaScript/React rules
 - `configs/pyproject.toml` - Python tools configuration (from Rules-Decision workflow)
 - `configs/.clang-format` - C/C++/Arduino formatting rules
 
@@ -106,11 +108,13 @@ npm run check:workspace
 ## 📊 Detailed Tool Coverage
 
 ### JavaScript/TypeScript
+
 - **Prettier**: Code formatting
 - **ESLint**: Linting with React, Jest, and Testing Library plugins
 - **Testing**: Automated test running where configured
 
 ### Python
+
 - **Black**: Code formatting
 - **isort**: Import sorting
 - **flake8**: Style guide enforcement
@@ -119,41 +123,49 @@ npm run check:workspace
 - **safety**: Dependency vulnerability scanning
 
 ### C/C++ (Arduino)
+
 - **clang-format**: Code formatting
 - **Static analysis**: Common Arduino/embedded patterns
 - **Project structure**: Arduino-specific checks
 
 ### Docker
+
 - **dockerfilelint**: Dockerfile best practices
 
 ### Git Integration
+
 - **Pre-commit hooks**: Automatic linting before commits
 - **Repository detection**: Workspace-aware linting
 
 ## 🎯 Usage Examples
 
 ### Lint Everything
+
 ```bash
 cd Pyrrha-Development-Tools
 npm run lint:all
 ```
 
 ### Fix Dashboard Code
+
 ```bash
 npm run format:dashboard
 ```
 
 ### Lint Only Python Repositories
+
 ```bash
 node scripts/lint-all.js --repo=Pyrrha-Rules-Decision
 ```
 
 ### Check Workspace Health
+
 ```bash
 npm run check:workspace
 ```
 
 ### Setup Git Hooks for All Repos
+
 ```bash
 npm run setup:hooks
 ```
@@ -165,9 +177,10 @@ After running `npm run setup:hooks`, every Git commit in any Pyrrha repository w
 1. ✅ **Auto-detect** the repository type
 2. 🔍 **Run appropriate linting** (JavaScript, Python, etc.)
 3. ❌ **Block the commit** if linting fails
-4. 💡 **Provide fix suggestions** 
+4. 💡 **Provide fix suggestions**
 
 To bypass hooks for emergency commits:
+
 ```bash
 git commit --no-verify
 ```
@@ -175,13 +188,15 @@ git commit --no-verify
 ## 🎨 Code Style Standards
 
 ### JavaScript/React
+
 - **Semi-colons**: Required
 - **Quotes**: Single quotes preferred
 - **Line Length**: 80 characters
 - **Trailing Commas**: ES5 style
 - **React**: Latest hooks and best practices
 
-### Python  
+### Python
+
 - **Line Length**: 88 characters (Black default)
 - **Import Sorting**: Black-compatible isort profile
 - **Type Hints**: Encouraged but not required
@@ -194,7 +209,7 @@ git commit --no-verify
 Ready-to-use workflow templates are provided in `templates/`:
 
 - `github-workflow-dashboard.yml` - Multi-stack Dashboard linting (matches current workflow)
-- `github-workflow-python.yml` - Python repositories (matches Rules-Decision workflow)  
+- `github-workflow-python.yml` - Python repositories (matches Rules-Decision workflow)
 - `github-workflow-cpp.yml` - C/C++/Arduino firmware linting
 - `github-workflow-centralized.yml` - Uses this centralized tooling system
 
@@ -213,6 +228,7 @@ The templates match the existing proven workflows:
 3. **Gradually adopt templates** - For new repositories or major updates
 
 ### Example Integration
+
 ```yaml
 - name: Centralized Linting
   run: |
@@ -226,12 +242,14 @@ The templates match the existing proven workflows:
 ### Common Issues
 
 **"Command not found" errors:**
+
 ```bash
 # Ensure all dependencies are installed
 npm run setup
 ```
 
 **Python virtual environment issues:**
+
 ```bash
 # Dashboard Flask API setup
 cd Pyrrha-Dashboard/pyrrha-dashboard/api-main
@@ -241,6 +259,7 @@ pip install -r requirements.txt
 ```
 
 **Git hooks not working:**
+
 ```bash
 # Reinstall hooks
 npm run setup:hooks
@@ -249,6 +268,7 @@ chmod +x .git/hooks/pre-commit
 ```
 
 ### Verbose Debugging
+
 ```bash
 # See detailed output
 node scripts/lint-all.js --verbose
@@ -280,4 +300,5 @@ Apache 2.0 - See individual repository licenses for specific terms.
 ---
 
 **Pyrrha Platform** - Firefighter Safety Through Technology  
-🔗 [Platform Overview](../README.md) • 🚀 [Deployment Guide](../Pyrrha-Deployment-Configurations/README.md)# Pyrrha-Development-Tools
+🔗 [Platform Overview](../README.md) • 🚀
+[Deployment Guide](../Pyrrha-Deployment-Configurations/README.md)# Pyrrha-Development-Tools

@@ -59,13 +59,17 @@ const REPO_CONFIGS = {
   },
   'Pyrrha-Mobile-App': {
     type: 'java-android',
-    languages: ['java'],
-    scripts: [] // Skip for now - would need Java/Android linting
+    languages: ['java', 'xml'],
+    hasAndroid: true,
+    hasSamsungAccessory: true,
+    scripts: ['lint-mobile.sh']
   },
   'Pyrrha-Watch-App': {
-    type: 'web-hybrid',
-    languages: ['javascript'],
-    scripts: ['lint-nodejs.sh']
+    type: 'tizen-javascript',
+    languages: ['javascript', 'css', 'html'],
+    hasTizen: true,
+    hasSamsungAccessory: true,
+    scripts: ['lint-watch.sh']
   }
 };
 

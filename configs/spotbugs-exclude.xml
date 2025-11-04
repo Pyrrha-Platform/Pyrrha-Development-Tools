@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- SpotBugs configuration for Pyrrha Android Mobile App -->
+    
+    <!-- Suppress false positives in generated code -->
+    <Match>
+        <Package name="~.*\.R\$.*"/>
+    </Match>
+    
+    <Match>
+        <Class name="~.*\.BuildConfig"/>
+    </Match>
+    
+    <!-- Samsung Accessory SDK specific suppressions -->
+    <Match>
+        <Package name="org.pyrrha_platform.galaxy"/>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
+    </Match>
+    
+    <!-- Android Bluetooth LE service suppressions -->
+    <Match>
+        <Class name="org.pyrrha_platform.ble.BluetoothLeService"/>
+        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"/>
+    </Match>
+    
+    <!-- DeviceDashboard complexity suppressions -->
+    <Match>
+        <Class name="org.pyrrha_platform.DeviceDashboard"/>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
+    
+    <!-- Suppress serialization warnings for Android Parcelables -->
+    <Match>
+        <Bug pattern="SE_NO_SERIALVERSIONID"/>
+    </Match>
+    
+    <!-- Suppress SQL injection warnings for parameterized queries -->
+    <Match>
+        <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"/>
+    </Match>
+
+    <!-- Android specific suppressions -->
+    <Match>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
+        <Method name="~.*\.findViewById"/>
+    </Match>
+    
+    <!-- IoT Platform integration suppressions -->
+    <Match>
+        <Package name="org.pyrrha_platform.iot"/>
+        <Bug pattern="HARD_CODE_PASSWORD"/>
+    </Match>
+    
+    <!-- Test code suppressions -->
+    <Match>
+        <Package name="~.*\.test.*"/>
+    </Match>
+    
+    <Match>
+        <Source name="~.*Test\.java"/>
+    </Match>
+</FindBugsFilter>

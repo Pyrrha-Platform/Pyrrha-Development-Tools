@@ -108,12 +108,12 @@ bandit -r . -f json -o bandit-report.json || echo "⚠️ Bandit security issues
 
 echo ""
 echo "🛡️  === Dependency Security (Safety) ==="
-safety check --json --output safety-report.json || echo "⚠️ Safety dependency issues found (check safety-report.json)"
+safety check --output json --save-json safety-report.json || echo "⚠️ Safety dependency issues found (check safety-report.json)"
 
 echo ""
 echo "🔧 === Dockerfile Linting ==="
 if find . -name "Dockerfile*" -type f | head -1 | grep -q .; then
-    find . -name "Dockerfile*" -exec echo "📋 Linting: {}" \\; -exec dockerfilelint {} \\;
+    find . -name "Dockerfile*" -exec echo "📋 Linting: {}" \; -exec dockerfilelint {} \;
 else
     echo "📋 No Dockerfiles found"
 fi
